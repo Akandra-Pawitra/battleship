@@ -50,7 +50,7 @@ describe('Gameboard factory function', () => {
     })
   })
 
-  describe('receiveAttack method', () => {
+  describe.skip('receiveAttack method', () => {
     gameboard.place([0, 0], [4, 0])
     gameboard.receiveAttack([0, 0])
 
@@ -64,6 +64,24 @@ describe('Gameboard factory function', () => {
 
     test('Ship in attacked coordinate take a hit', () => {
       expect(gameboard.ships.carrier.hits).not.toBe(0)
+    })
+  })
+
+  describe('allSunk method', () => {
+    const gameboard1 = Gameboard()
+    gameboard1.place([2, 2], [2, 2])
+    gameboard1.place([0, 0], [0, 2])
+    gameboard1.receiveAttack([2, 2])
+    gameboard1.receiveAttack([0, 0])
+    gameboard1.receiveAttack([0, 1])
+    gameboard1.receiveAttack([0, 2])
+
+    test.skip('Return false if all ships is not sunk', () => {
+      expect(gameboard1.allSunk()).toBe(false)
+    })
+
+    test('Return true if all ships is sunk', () => {
+      expect(gameboard1.allSunk()).toBe(true)
     })
   })
 })

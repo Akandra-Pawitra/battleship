@@ -71,10 +71,24 @@ export const Gameboard = () => {
       return 1
     } else {
       const ship = this.cells[index].ship
-      if (ship) this.ships[ship].hit()
+      if (ship) {
+        this.ships[ship].hit()
+        this.ships[ship].isSunk()
+      }
       this.attack.push(index)
       return 0
     }
   }
-  return { cells, attack, ships, place, receiveAttack }
+  const allSunk = function () {
+    const arr = []
+    for (const ship in this.ships) {
+      arr.push(ship)
+    }
+    const sunk = []
+    for (const key of arr) {
+      if (this.ships[key]) sunk.push(this.ships[key].sunk)
+    }
+    return sunk.every(val => val === 1)
+  }
+  return { cells, attack, ships, place, receiveAttack, allSunk }
 }
