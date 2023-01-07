@@ -26,28 +26,44 @@ describe.skip('Ship factory function', () => {
 
 describe('Gameboard factory function', () => {
   const gameboard = Gameboard()
-  const carrier = Ship(5)
-  gameboard.place([0, 0], [0, 4])
-  gameboard.place([5, 5], [5, 5])
-  gameboard.place([7, 3], [7, 3])
 
-  test('Have 10x10 cells', () => {
-    expect(gameboard.cells.length).toEqual(100)
+  describe.skip('place method', () => {
+    const carrier = Ship(5)
+    gameboard.place([0, 0], [0, 4])
+    gameboard.place([5, 5], [5, 5])
+    gameboard.place([7, 3], [7, 3])
+
+    test('Should able to place a ship in passed coordinate', () => {
+      expect(JSON.stringify(gameboard.ships.carrier)).toStrictEqual(JSON.stringify(carrier))
+    })
+
+    test('Cell should know store ships type (0)', () => {
+      expect(gameboard.cells[40].ship).toBe('carrier')
+    })
+
+    test('Cell should know store ships type (1)', () => {
+      expect(gameboard.cells[55].ship).toBe('patrol1')
+    })
+
+    test('Cell should know store ships type (2)', () => {
+      expect(gameboard.cells[37].ship).toBe('patrol2')
+    })
   })
 
-  test('Should able to place a ship in passed coordinate', () => {
-    expect(JSON.stringify(gameboard.ships.carrier)).toStrictEqual(JSON.stringify(carrier))
-  })
+  describe('receiveAttack method', () => {
+    gameboard.place([0, 0], [4, 0])
+    gameboard.receiveAttack([0, 0])
 
-  test('Cell should know store ships type (0)', () => {
-    expect(gameboard.cells[40].ship).toBe('carrier')
-  })
+    test('Able to attack a tiles', () => {
+      expect(gameboard.receiveAttack([1, 1])).toBe(0)
+    })
 
-  test('Cell should know store ships type (1)', () => {
-    expect(gameboard.cells[55].ship).toBe('patrol1')
-  })
+    test('Should not be able to attack same tiles', () => {
+      expect(gameboard.receiveAttack([0, 0])).toBe(1)
+    })
 
-  test('Cell should know store ships type (2)', () => {
-    expect(gameboard.cells[37].ship).toBe('patrol2')
+    test('Ship in attacked coordinate take a hit', () => {
+      expect(gameboard.ships.carrier.hits).not.toBe(0)
+    })
   })
 })

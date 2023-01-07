@@ -9,6 +9,7 @@ export const Gameboard = () => {
     }
     return arr
   })()
+  const attack = []
   const ships = {
     carrier: null,
     battleship: null,
@@ -63,5 +64,17 @@ export const Gameboard = () => {
       this.cells[index].ship = shipType
     }
   }
-  return { cells, ships, place }
+  const receiveAttack = function (coor) {
+    const index = coor[0] + coor[1] * 10
+    const check = this.attack.includes(index)
+    if (check) {
+      return 1
+    } else {
+      const ship = this.cells[index].ship
+      if (ship) this.ships[ship].hit()
+      this.attack.push(index)
+      return 0
+    }
+  }
+  return { cells, attack, ships, place, receiveAttack }
 }
