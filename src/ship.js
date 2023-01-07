@@ -1,5 +1,5 @@
-const Ship = (length) => {
-  if (length < 2 || length > 5) {
+export const Ship = (length) => {
+  if (length < 1 || length > 5) {
     return 'Invalid length'
   } else {
     const hits = 0
@@ -14,6 +14,3 @@ const Ship = (length) => {
     return { length, hits, sunk, hit, isSunk }
   }
 }
-
-const Script = { Ship }
-export default Script
