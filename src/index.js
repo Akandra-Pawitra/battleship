@@ -113,12 +113,52 @@ const Gameboard = () => {
   return { cells, attack, ships, place, receiveAttack, allSunk }
 }
 
+const DOM = {
+  start: document.querySelector('#start'),
+  board: document.querySelector('.board'),
+  playerGrid: document.querySelector('.player-grid'),
+  botGrid: document.querySelector('.bot-grid'),
+  playerShipSelection: {
+    carrier: document.querySelector('.ship button.carrier'),
+    battleship: document.querySelector('.ship button.battleship'),
+    destroyer: document.querySelector('.ship button.destroyer'),
+    submarine1: document.querySelector('.ship button.submarine1'),
+    submarine2: document.querySelector('.ship button.submarine2'),
+    patrol1: document.querySelector('.ship button.patrol1'),
+    patrol2: document.querySelector('.ship button.patrol2')
+  },
+  disableSelection: function () {
+    DOM.playerShipSelection.carrier.setAttribute('disabled', true)
+    DOM.playerShipSelection.battleship.setAttribute('disabled', true)
+    DOM.playerShipSelection.destroyer.setAttribute('disabled', true)
+    DOM.playerShipSelection.submarine1.setAttribute('disabled', true)
+    DOM.playerShipSelection.submarine2.setAttribute('disabled', true)
+    DOM.playerShipSelection.patrol1.setAttribute('disabled', true)
+    DOM.playerShipSelection.patrol2.setAttribute('disabled', true)
+  },
+  enableSelection: function () {
+    DOM.selectShip.carrier.removeAttribute('disabled')
+    DOM.selectShip.battleship.removeAttribute('disabled')
+    DOM.selectShip.destroyer.removeAttribute('disabled')
+    DOM.selectShip.submarine1.removeAttribute('disabled')
+    DOM.selectShip.submarine2.removeAttribute('disabled')
+    DOM.selectShip.patrol1.removeAttribute('disabled')
+    DOM.selectShip.patrol2.removeAttribute('disabled')
+  },
+  enableGrid: function () {
+    DOM.disableSelection()
+  }
+}
+
 const Interface = {
-  player1Board: Gameboard(),
-  player2Board: Gameboard(),
+  playerBoard: Gameboard(),
+  botBoard: Gameboard(),
   state: null,
+  selectShip: function () {
+    DOM.enableGrid()
+  },
   sendData: function (coor, id) {
-    switch (this.state) {
+    switch (Interface.state) {
       case 'placing':
         //
         break
@@ -131,25 +171,35 @@ const Interface = {
     }
   },
   init: function () {
-    start.setAttribute('style', 'display: none')
-    board.setAttribute('style', 'display: grid')
+    DOM.start.setAttribute('style', 'display: none')
+    DOM.board.setAttribute('style', 'display: grid')
     for (let i = 0; i < 10; i++) {
       for (let j = 0; j < 10; j++) {
         const cell = document.createElement('button')
-        cell.value = `${i}${j}` // 00, 01, 02, etc
-        cell.onclick = () => Interface.sendData([i, j], 1)
-        player1div.appendChild(cell)
+        cell.value = `${i}${j}`
+        cell.setAttribute('class', 'player-cell')
+        cell.setAttribute('disabled', true)
+        cell.onclick = Interface.sendData([i, j], 1)
+        DOM.playerGrid.appendChild(cell)
       }
     }
     for (let i = 0; i < 10; i++) {
       for (let j = 0; j < 10; j++) {
         const cell = document.createElement('button')
-        cell.value = `${i}${j}` // 00, 01, 02, etc
-        cell.onclick = () => Interface.sendData([i, j], 2)
-        player2div.appendChild(cell)
+        cell.value = `${i}${j}`
+        cell.setAttribute('disabled', true)
+        cell.onclick = Interface.sendData([i, j], 2)
+        DOM.botGrid.appendChild(cell)
       }
     }
-    this.state = 'placing'
+    DOM.playerShipSelection.carrier.onclick = Interface.selectShip
+    DOM.playerShipSelection.battleship.onclick = Interface.selectShip
+    DOM.playerShipSelection.destroyer.onclick = Interface.selectShip
+    DOM.playerShipSelection.submarine1.onclick = Interface.selectShip
+    DOM.playerShipSelection.submarine2.onclick = Interface.selectShip
+    DOM.playerShipSelection.patrol1.onclick = Interface.selectShip
+    DOM.playerShipSelection.patrol2.onclick = Interface.selectShip
+    Interface.state = 'placing'
   }
 }
 
@@ -157,12 +207,7 @@ const Bot = {
   //
 }
 
-const start = document.querySelector('#init')
-const board = document.querySelector('.board')
-const player1div = document.querySelector('.player1')
-const player2div = document.querySelector('.player2')
-
-start.onclick = Interface.init
+DOM.start.onclick = Interface.init
 
 const Script = { Ship, Gameboard, Interface, Bot }
 export default Script
