@@ -29,7 +29,8 @@ const Gameboard = () => {
     carrier: null,
     battleship: null,
     destroyer: null,
-    submarine: null,
+    submarine1: null,
+    submarine2: null,
     patrol1: null,
     patrol2: null
   }
@@ -59,7 +60,11 @@ const Gameboard = () => {
         shipType = 'destroyer'
         break
       case 2:
-        shipType = 'submarine'
+        if (this.ships.submarine1 === null) {
+          shipType = 'submarine1'
+        } else if (this.ships.submarine2 === null) {
+          shipType = 'submarine2'
+        }
         break
       case 1:
         if (this.ships.patrol1 === null) {
@@ -111,8 +116,19 @@ const Gameboard = () => {
 const Interface = {
   player1Board: Gameboard(),
   player2Board: Gameboard(),
+  state: null,
   sendData: function (coor, id) {
-    //
+    switch (this.state) {
+      case 'placing':
+        //
+        break
+      case 'attacking':
+        //
+        break
+      case 'ended':
+        //
+        break
+    }
   },
   init: function () {
     start.setAttribute('style', 'display: none')
@@ -133,6 +149,7 @@ const Interface = {
         player2div.appendChild(cell)
       }
     }
+    this.state = 'placing'
   }
 }
 
