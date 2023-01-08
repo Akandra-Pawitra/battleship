@@ -10,7 +10,78 @@
 </head>
 
 <body>
-  <div id="test"></div>
+  <div class="start">
+    <button id="init">Start</button>
+  </div>
+
+  <div class="board">
+    <p>Player 1</p>
+    <p>Player 2</p>
+    <div class="board1">
+      <div class="player1"></div>
+    </div>
+    <div class="board2">
+      <div class="player2"></div>
+    </div>
+  </div>
+
+  <style>
+    * {
+      color: rgb(200, 200, 200);
+      font-size: xx-large;
+      text-align: center;
+    }
+
+    body {
+      margin: 0;
+      background-color: rgb(10, 10, 10);
+    }
+
+    .start {
+      display: flex;
+    }
+
+    #init {
+      background-color: rgb(20, 20, 20);
+      border: 1px solid;
+      margin: 10px auto;
+      padding: 20px;
+      width: 200px;
+    }
+
+    .board {
+      display: none;
+      grid-template-columns: 1fr 1fr;
+      margin: 40px;
+      padding: 20px;
+      column-gap: 20px;
+    }
+
+    .board p {
+      margin-top: -20px;
+    }
+
+    .board1,
+    .board2 {
+      display: flex;
+    }
+
+    .player1,
+    .player2 {
+      align-items: center;
+      margin: auto;
+      display: grid;
+      grid-template-columns: repeat(10, 40px);
+      grid-template-rows: repeat(10, 40px);
+    }
+
+    .player1 button,
+    .player2 button {
+      width: 40px;
+      height: 40px;
+      border-radius: 0;
+    }
+  </style>
 </body>
 
 </html>

@@ -1,7 +1,11 @@
-import { Ship } from './ship'
-import { Gameboard } from './gameboard'
+import Script from './index'
 
-describe.skip('Ship factory function', () => {
+const Ship = Script.Ship
+const Gameboard = Script.Gameboard
+// const Interface = Script.Interface
+// const Bot = Script.Bot
+
+describe('Ship factory function', () => {
   const ship = Ship(2)
   ship.hit()
   const prevhit = ship.hits
@@ -27,7 +31,7 @@ describe.skip('Ship factory function', () => {
 describe('Gameboard factory function', () => {
   const gameboard = Gameboard()
 
-  describe.skip('place method', () => {
+  describe('place method', () => {
     const carrier = Ship(5)
     gameboard.place([0, 0], [0, 4])
     gameboard.place([5, 5], [5, 5])
@@ -50,20 +54,21 @@ describe('Gameboard factory function', () => {
     })
   })
 
-  describe.skip('receiveAttack method', () => {
-    gameboard.place([0, 0], [4, 0])
-    gameboard.receiveAttack([0, 0])
+  describe('receiveAttack method', () => {
+    const gameboard2 = Gameboard()
+    gameboard2.place([0, 0], [4, 0])
+    gameboard2.receiveAttack([0, 0])
 
     test('Able to attack a tiles', () => {
-      expect(gameboard.receiveAttack([1, 1])).toBe(0)
+      expect(gameboard2.receiveAttack([1, 1])).toBe(0)
     })
 
     test('Should not be able to attack same tiles', () => {
-      expect(gameboard.receiveAttack([0, 0])).toBe(1)
+      expect(gameboard2.receiveAttack([0, 0])).toBe(1)
     })
 
     test('Ship in attacked coordinate take a hit', () => {
-      expect(gameboard.ships.carrier.hits).not.toBe(0)
+      expect(gameboard2.ships.carrier.hits).not.toBe(0)
     })
   })
 
@@ -84,4 +89,8 @@ describe('Gameboard factory function', () => {
       expect(gameboard1.allSunk()).toBe(true)
     })
   })
+})
+
+describe('Server middleware', () => {
+  //
 })
