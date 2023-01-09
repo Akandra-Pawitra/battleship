@@ -59,6 +59,10 @@ body {
   font-size: large;
 }
 
+.occupied {
+  background-color: rgb(10, 10, 10);
+}
+
 .ship1,
 .ship2 {
   display: grid;
@@ -85,7 +89,6 @@ body {
 
 .player-grid button,
 .bot-grid button {
-  background-color: rgb(100, 100, 100);
   width: 40px;
   height: 40px;
   border-radius: 0;

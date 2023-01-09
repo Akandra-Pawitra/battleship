@@ -4,8 +4,8 @@
   "description": "",
   "private": true,
   "scripts": {
-    "test": "jest",
-    "build": "webpack --mode=development"
+    "test": "jest --watch",
+    "build": "webpack --mode=development --watch"
   },
   "repository": {
     "type": "git",

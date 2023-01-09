@@ -36,19 +36,15 @@ const Gameboard = () => {
   }
   const place = function (start, end) {
     let [cell, shipType] = [[], null]
-    // get ship position
     if (end[1] - start[1]) {
-      // vertical
       for (let i = 0; i < (end[1] - start[1] + 1); i++) {
         cell.push([start[0], start[1] + i])
       }
     } else {
-      // horizontal
       for (let i = 0; i < (end[0] - start[0] + 1); i++) {
         cell.push([start[0] + i, start[1]])
       }
     }
-    // get ship type
     switch (cell.length) {
       case 5:
         shipType = 'carrier'
@@ -74,11 +70,9 @@ const Gameboard = () => {
         }
         break
     }
-    // track placed ship
     if (this.ships[shipType] === null) {
       this.ships[shipType] = Ship(cell.length)
     }
-    // occupy cell with ship
     for (let i = 0; i < cell.length; i++) {
       const index = cell[i][0] + (cell[i][1] * 10)
       this.cells[index].ship = shipType
@@ -119,34 +113,65 @@ const DOM = {
   playerGrid: document.querySelector('.player-grid'),
   botGrid: document.querySelector('.bot-grid'),
   playerShipSelection: {
-    carrier: document.querySelector('.ship button.carrier'),
-    battleship: document.querySelector('.ship button.battleship'),
-    destroyer: document.querySelector('.ship button.destroyer'),
-    submarine1: document.querySelector('.ship button.submarine1'),
-    submarine2: document.querySelector('.ship button.submarine2'),
-    patrol1: document.querySelector('.ship button.patrol1'),
-    patrol2: document.querySelector('.ship button.patrol2')
+    carrier: {
+      button: document.querySelector('.ship button.carrier'),
+      p: document.querySelector('.ship p.carrier')
+    },
+    battleship: {
+      button: document.querySelector('.ship button.battleship'),
+      p: document.querySelector('.ship p.battleship')
+    },
+    destroyer: {
+      button: document.querySelector('.ship button.destroyer'),
+      p: document.querySelector('.ship p.destroyer')
+    },
+    submarine: {
+      button: document.querySelector('.ship button.submarine'),
+      p: document.querySelector('.ship p.submarine')
+    },
+    patrol: {
+      button: document.querySelector('.ship button.patrol'),
+      p: document.querySelector('.ship p.patrol')
+    }
   },
   disableSelection: function () {
-    DOM.playerShipSelection.carrier.setAttribute('disabled', true)
-    DOM.playerShipSelection.battleship.setAttribute('disabled', true)
-    DOM.playerShipSelection.destroyer.setAttribute('disabled', true)
-    DOM.playerShipSelection.submarine1.setAttribute('disabled', true)
-    DOM.playerShipSelection.submarine2.setAttribute('disabled', true)
-    DOM.playerShipSelection.patrol1.setAttribute('disabled', true)
-    DOM.playerShipSelection.patrol2.setAttribute('disabled', true)
+    for (const ship in DOM.playerShipSelection) {
+      DOM.playerShipSelection[ship].button.setAttribute('disabled', '')
+    }
   },
   enableSelection: function () {
-    DOM.selectShip.carrier.removeAttribute('disabled')
-    DOM.selectShip.battleship.removeAttribute('disabled')
-    DOM.selectShip.destroyer.removeAttribute('disabled')
-    DOM.selectShip.submarine1.removeAttribute('disabled')
-    DOM.selectShip.submarine2.removeAttribute('disabled')
-    DOM.selectShip.patrol1.removeAttribute('disabled')
-    DOM.selectShip.patrol2.removeAttribute('disabled')
+    for (const ship in DOM.playerShipSelection) {
+      if (DOM.playerShipSelection[ship].p.textContent !== '0x') {
+        DOM.playerShipSelection[ship].button.removeAttribute('disabled')
+      }
+    }
   },
-  enableGrid: function () {
+  enableGrid: function (included) {
     DOM.disableSelection()
+    const playercells = [...document.querySelectorAll('.player-cell')]
+    const occupiedcell = [...document.querySelectorAll('.occupied')]
+    const exclude = []
+    for (const occupied of occupiedcell) {
+      for (const cell of playercells) {
+        if (cell === occupied) {
+          exclude.push(playercells.indexOf(cell))
+        }
+      }
+    }
+    if (included) {
+      for (let i = 0; i < playercells.length; i++) {
+        playercells[i].setAttribute('disabled', '')
+      }
+      for (let i = 0; i < included.length; i++) {
+        playercells[included[i]].removeAttribute('disabled')
+      }
+    } else {
+      for (let i = 0; i < playercells.length; i++) {
+        if (exclude.includes(i)) {
+          continue
+        } else playercells[i].removeAttribute('disabled')
+      }
+    }
   }
 }
 
@@ -154,13 +179,86 @@ const Interface = {
   playerBoard: Gameboard(),
   botBoard: Gameboard(),
   state: null,
-  selectShip: function () {
-    DOM.enableGrid()
+  cache: {
+    type: null,
+    coor: [],
+    length: null,
+    valid: []
   },
-  sendData: function (coor, id) {
+  selectShip: function (length, type) {
+    DOM.enableGrid()
+    Interface.cache.length = length
+    Interface.cache.type = type
+  },
+  sendData: function (coor) {
     switch (Interface.state) {
       case 'placing':
-        //
+        Interface.cache.coor.push(coor)
+        if (Interface.cache.length > 1) {
+          if (Interface.cache.coor.length === 1) {
+            if ((coor[1] - 1 * Interface.cache.length) >= -1) {
+              for (let i = 1; i < Interface.cache.length; i++) {
+                Interface.cache.valid.push(coor[0] + (coor[1] - i) * 10)
+              }
+            }
+            if ((coor[0] + 1 * Interface.cache.length) <= 10) {
+              for (let i = 1; i < Interface.cache.length; i++) {
+                Interface.cache.valid.push((coor[0] + i) + coor[1] * 10)
+              }
+            }
+            if ((coor[1] + 1 * Interface.cache.length) <= 10) {
+              for (let i = 1; i < Interface.cache.length; i++) {
+                Interface.cache.valid.push(coor[0] + (coor[1] + i) * 10)
+              }
+            }
+            if ((coor[0] - 1 * Interface.cache.length) >= -1) {
+              for (let i = 1; i < Interface.cache.length; i++) {
+                Interface.cache.valid.push((coor[0] - i) + coor[1] * 10)
+              }
+            }
+          } else if (Interface.cache.coor.length === 2) {
+            const start = Interface.cache.coor[0]
+            const firstIndex = start[0] + start[1] * 10
+            const coorIndex = coor[0] + coor[1] * 10
+            const delta = (coorIndex) - (firstIndex)
+            const validIndex = []
+            switch (delta) {
+              case 1:
+                for (let i = 1; i < Interface.cache.length - 1; i++) {
+                  validIndex.push(coorIndex + i * 1)
+                }
+                break
+              case -1:
+                for (let i = 1; i < Interface.cache.length - 1; i++) {
+                  validIndex.push(coorIndex + i * -1)
+                }
+                break
+              case 10:
+                for (let i = 1; i < Interface.cache.length - 1; i++) {
+                  validIndex.push(coorIndex + i * 10)
+                }
+                break
+              case -10:
+                for (let i = 1; i < Interface.cache.length - 1; i++) {
+                  validIndex.push(coorIndex + i * -10)
+                }
+                break
+            }
+            Interface.cache.valid = validIndex
+          }
+          const cells = document.querySelectorAll('.player-cell')
+          cells[coor[0] + coor[1] * 10].setAttribute('class', 'occupied player-cell')
+          DOM.enableGrid(Interface.cache.valid)
+        }
+        // check if position placement is complete
+        if (Interface.cache.coor.length === Interface.cache.length) {
+          const coor = Interface.cache.coor
+          const start = coor[0]
+          const end = coor[coor.length - 1]
+          DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent = '0x'
+          DOM.enableSelection()
+          Interface.playerBoard.place(start, end)
+        }
         break
       case 'attacking':
         //
@@ -176,29 +274,35 @@ const Interface = {
     for (let i = 0; i < 10; i++) {
       for (let j = 0; j < 10; j++) {
         const cell = document.createElement('button')
-        cell.value = `${i}${j}`
         cell.setAttribute('class', 'player-cell')
-        cell.setAttribute('disabled', true)
-        cell.onclick = Interface.sendData([i, j], 1)
+        cell.setAttribute('disabled', '')
+        cell.onclick = () => Interface.sendData([j, i])
         DOM.playerGrid.appendChild(cell)
       }
     }
     for (let i = 0; i < 10; i++) {
       for (let j = 0; j < 10; j++) {
         const cell = document.createElement('button')
-        cell.value = `${i}${j}`
         cell.setAttribute('disabled', true)
-        cell.onclick = Interface.sendData([i, j], 2)
+        cell.onclick = () => Interface.sendData([j, i])
         DOM.botGrid.appendChild(cell)
       }
     }
-    DOM.playerShipSelection.carrier.onclick = Interface.selectShip
-    DOM.playerShipSelection.battleship.onclick = Interface.selectShip
-    DOM.playerShipSelection.destroyer.onclick = Interface.selectShip
-    DOM.playerShipSelection.submarine1.onclick = Interface.selectShip
-    DOM.playerShipSelection.submarine2.onclick = Interface.selectShip
-    DOM.playerShipSelection.patrol1.onclick = Interface.selectShip
-    DOM.playerShipSelection.patrol2.onclick = Interface.selectShip
+    DOM.playerShipSelection.carrier.button.onclick = () => {
+      Interface.selectShip(5, 'carrier')
+    }
+    DOM.playerShipSelection.battleship.button.onclick = () => {
+      Interface.selectShip(4, 'battleship')
+    }
+    DOM.playerShipSelection.destroyer.button.onclick = () => {
+      Interface.selectShip(3, 'destroyer')
+    }
+    DOM.playerShipSelection.submarine.button.onclick = () => {
+      Interface.selectShip(2, 'submarine')
+    }
+    DOM.playerShipSelection.patrol.button.onclick = () => {
+      Interface.selectShip(1, 'patrol')
+    }
     Interface.state = 'placing'
   }
 }
@@ -207,7 +311,7 @@ const Bot = {
   //
 }
 
-DOM.start.onclick = Interface.init
+DOM.start.onclick = Interface.init()
 
 const Script = { Ship, Gameboard, Interface, Bot }
 export default Script
