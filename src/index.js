@@ -149,7 +149,7 @@ const DOM = {
   enableGrid: function (included) {
     DOM.disableSelection()
     const playercells = [...document.querySelectorAll('.player-cell')]
-    const occupiedcell = [...document.querySelectorAll('.player-cell .occupied')]
+    const occupiedcell = [...document.querySelectorAll('.occupied')]
     const exclude = []
     for (const occupied of occupiedcell) {
       for (const cell of playercells) {
@@ -193,8 +193,8 @@ const Interface = {
   sendData: function (coor) {
     switch (Interface.state) {
       case 'placing':
-        Interface.cache.coor.push(coor)
         if (Interface.cache.length > 1) {
+          Interface.cache.coor.push(coor)
           if (Interface.cache.coor.length === 1) {
             const length = Interface.cache.length
             const playercells = [...document.querySelectorAll('.player-cell')]
@@ -296,11 +296,27 @@ const Interface = {
           const cells = document.querySelectorAll('.player-cell')
           cells[coor[0] + coor[1] * 10].setAttribute('class', 'occupied player-cell')
           DOM.enableGrid(Interface.cache.valid)
-        }
-        if (Interface.cache.coor.length === Interface.cache.length) {
-          const coor = Interface.cache.coor
-          const start = coor[0]
-          const end = coor[coor.length - 1]
+
+          if (Interface.cache.coor.length === Interface.cache.length) {
+            const coor = Interface.cache.coor
+            const start = coor[0]
+            const end = coor[coor.length - 1]
+            const text = DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent
+            if (text === 'x2') {
+              DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent = 'x1'
+            } else {
+              DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent = 'x0'
+            }
+            DOM.enableSelection()
+            Interface.playerBoard.place(start, end)
+            Interface.cache.coor = []
+          }
+        } else {
+          const cells = document.querySelectorAll('.player-cell')
+          cells[coor[0] + coor[1] * 10].setAttribute('class', 'occupied player-cell')
+          for (const index of cells) {
+            index.setAttribute('disabled', '')
+          }
           const text = DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent
           if (text === 'x2') {
             DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent = 'x1'
@@ -308,8 +324,7 @@ const Interface = {
             DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent = 'x0'
           }
           DOM.enableSelection()
-          Interface.playerBoard.place(start, end)
-          Interface.cache.coor = []
+          Interface.playerBoard.place(coor, coor)
         }
         break
       case 'attacking':
