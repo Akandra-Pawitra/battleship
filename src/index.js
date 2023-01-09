@@ -109,7 +109,8 @@ const Gameboard = () => {
 
 const DOM = {
   start: document.querySelector('#start'),
-  board: document.querySelector('.board'),
+  wrapper: document.querySelector('.wrapper'),
+  play: document.getElementById('play'),
   playerGrid: document.querySelector('.player-grid'),
   botGrid: document.querySelector('.bot-grid'),
   playerShipSelection: {
@@ -140,9 +141,22 @@ const DOM = {
     }
   },
   enableSelection: function () {
+    const enable = []
     for (const ship in DOM.playerShipSelection) {
       if (DOM.playerShipSelection[ship].p.textContent !== 'x0') {
+        enable.push(ship)
+      }
+    }
+    if (enable.length !== 0) {
+      for (const ship of enable) {
         DOM.playerShipSelection[ship].button.removeAttribute('disabled')
+      }
+    } else {
+      DOM.play.removeAttribute('disabled')
+      DOM.play.textContent = 'START'
+      DOM.play.style.color = 'black'
+      DOM.play.onclick = () => {
+        //
       }
     }
   },
@@ -296,7 +310,6 @@ const Interface = {
           const cells = document.querySelectorAll('.player-cell')
           cells[coor[0] + coor[1] * 10].setAttribute('class', 'occupied player-cell')
           DOM.enableGrid(Interface.cache.valid)
-
           if (Interface.cache.coor.length === Interface.cache.length) {
             const coor = Interface.cache.coor
             const start = coor[0]
@@ -360,7 +373,7 @@ const Interface = {
 ;(function setEventToDOM () {
   DOM.start.onclick = () => {
     DOM.start.setAttribute('style', 'display: none')
-    DOM.board.setAttribute('style', 'display: grid')
+    DOM.wrapper.setAttribute('style', 'display: grid')
     Interface.state = 'placing'
   }
   DOM.playerShipSelection.carrier.button.onclick = () => {

@@ -23,10 +23,14 @@ body {
   width: 200px;
 }
 
-.board {
+.wrapper {
   display: none;
+}
+
+.board {
+  display: grid;
   grid-template-columns: 1fr 1fr;
-  margin: 40px;
+  margin: 40px 40px 0;
   padding: 20px;
   column-gap: 20px;
 }
@@ -96,4 +100,17 @@ body {
 
 .disabled {
   pointer-events: none;
+}
+
+.boardStart {
+  display: flex;
+}
+
+#play {
+  color: rgb(200, 200, 200);
+  grid-column: 1 2;
+  font-size: larger;
+  padding: 10px;
+  margin: auto;
+  height: min-content;
 }

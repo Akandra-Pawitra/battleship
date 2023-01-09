@@ -15,60 +15,66 @@
     <button id="start">Start</button>
   </div>
 
-  <div class="board">
-    <p class="player-name">Player 1</p>
-    <p class="player-name">Player 2</p>
-    <div class="board1">
-      <div class="ship1">
-        <div class="carrier ship">
-          <button class="carrier">CA</button>
-          <p class="carrier">x1</p>
+  <div class="wrapper">
+    <div class="board">
+      <p class="player-name">Player</p>
+      <p class="player-name">Bot</p>
+      <div class="board1">
+        <div class="ship1">
+          <div class="carrier ship">
+            <button class="carrier">CA</button>
+            <p class="carrier">x1</p>
+          </div>
+          <div class="battleship  ship">
+            <button class="battleship">BS</button>
+            <p class="battleship">x1</p>
+          </div>
+          <div class="destroyer ship">
+            <button class="destroyer">DD</button>
+            <p class="destroyer">x1</p>
+          </div>
+          <div class="submarine ship">
+            <button class="submarine">SB</button>
+            <p class="submarine">x2</p>
+          </div>
+          <div class="patrol1 ship">
+            <button class="patrol">PA</button>
+            <p class="patrol">x2</p>
+          </div>
         </div>
-        <div class="battleship  ship">
-          <button class="battleship">BS</button>
-          <p class="battleship">x1</p>
-        </div>
-        <div class="destroyer ship">
-          <button class="destroyer">DD</button>
-          <p class="destroyer">x1</p>
-        </div>
-        <div class="submarine ship">
-          <button class="submarine">SB</button>
-          <p class="submarine">x2</p>
-        </div>
-        <div class="patrol1 ship">
-          <button class="patrol">PA</button>
-          <p class="patrol">x2</p>
+        <div class="player-grid"></div>
+      </div>
+      <div class="board2">
+        <div class="bot-grid"></div>
+        <div class="ship2">
+          <div class="carrier ship">
+            <button class="carrier disabled">CA</button>
+            <p class="carrier">x1</p>
+          </div>
+          <div class="battleship ship">
+            <button class="battleship disabled">BS</button>
+            <p class="battleship">x1</p>
+          </div>
+          <div class="destroyer ship">
+            <button class="destroyer disabled">DD</button>
+            <p class="destroyer">x1</p>
+          </div>
+          <div class="submarine ship">
+            <button class="submarine disabled">SB</button>
+            <p class="submarine">x2</p>
+          </div>
+          <div class="patrol ship">
+            <button class="patrol disabled">PA</button>
+            <p class="patrol">x2</p>
+          </div>
         </div>
       </div>
-      <div class="player-grid"></div>
     </div>
-    <div class="board2">
-      <div class="bot-grid"></div>
-      <div class="ship2">
-        <div class="carrier ship">
-          <button class="carrier disabled">CA</button>
-          <p class="carrier">x1</p>
-        </div>
-        <div class="battleship ship">
-          <button class="battleship disabled">BS</button>
-          <p class="battleship">x1</p>
-        </div>
-        <div class="destroyer ship">
-          <button class="destroyer disabled">DD</button>
-          <p class="destroyer">x1</p>
-        </div>
-        <div class="submarine ship">
-          <button class="submarine">SB</button>
-          <p class="submarine">x2</p>
-        </div>
-        <div class="patrol1 ship">
-          <button class="patrol">PA</button>
-          <p class="patrol">x2</p>
-        </div>
-      </div>
+    <div class="boardStart">
+      <button id="play" disabled>PLACE YOUR SHIPS</button>
     </div>
   </div>
+
 </body>
 
 </html>
