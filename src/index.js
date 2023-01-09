@@ -141,7 +141,7 @@ const DOM = {
   },
   enableSelection: function () {
     for (const ship in DOM.playerShipSelection) {
-      if (DOM.playerShipSelection[ship].p.textContent !== '0x') {
+      if (DOM.playerShipSelection[ship].p.textContent !== 'x0') {
         DOM.playerShipSelection[ship].button.removeAttribute('disabled')
       }
     }
@@ -149,7 +149,7 @@ const DOM = {
   enableGrid: function (included) {
     DOM.disableSelection()
     const playercells = [...document.querySelectorAll('.player-cell')]
-    const occupiedcell = [...document.querySelectorAll('.occupied')]
+    const occupiedcell = [...document.querySelectorAll('.player-cell .occupied')]
     const exclude = []
     for (const occupied of occupiedcell) {
       for (const cell of playercells) {
@@ -196,25 +196,72 @@ const Interface = {
         Interface.cache.coor.push(coor)
         if (Interface.cache.length > 1) {
           if (Interface.cache.coor.length === 1) {
-            if ((coor[1] - 1 * Interface.cache.length) >= -1) {
-              for (let i = 1; i < Interface.cache.length; i++) {
-                Interface.cache.valid.push(coor[0] + (coor[1] - i) * 10)
+            const length = Interface.cache.length
+            const playercells = [...document.querySelectorAll('.player-cell')]
+            const occupied = [...document.querySelectorAll('.occupied')]
+            if ((coor[1] - 1 * length) >= -1) {
+              const top = []
+              for (let i = 1; i < length; i++) {
+                top.push(coor[0] + (coor[1] - i) * 10)
               }
+              let isOccupied = false
+              for (const cell of occupied) {
+                for (const node of top) {
+                  if (playercells[node] === cell) {
+                    isOccupied = true
+                    break
+                  }
+                }
+              }
+              if (!isOccupied) Interface.cache.valid.push(top[0])
             }
-            if ((coor[0] + 1 * Interface.cache.length) <= 10) {
-              for (let i = 1; i < Interface.cache.length; i++) {
-                Interface.cache.valid.push((coor[0] + i) + coor[1] * 10)
+            if ((coor[0] + 1 * length) <= 10) {
+              const right = []
+              for (let i = 1; i < length; i++) {
+                right.push((coor[0] + i) + coor[1] * 10)
               }
+              let isOccupied = false
+              for (const cell of occupied) {
+                for (const node of right) {
+                  if (playercells[node] === cell) {
+                    isOccupied = true
+                    break
+                  }
+                }
+              }
+              if (!isOccupied) Interface.cache.valid.push(right[0])
             }
-            if ((coor[1] + 1 * Interface.cache.length) <= 10) {
-              for (let i = 1; i < Interface.cache.length; i++) {
-                Interface.cache.valid.push(coor[0] + (coor[1] + i) * 10)
+            if ((coor[1] + 1 * length) <= 10) {
+              const down = []
+              for (let i = 1; i < length; i++) {
+                down.push(coor[0] + (coor[1] + i) * 10)
               }
+              let isOccupied = false
+              for (const cell of occupied) {
+                for (const node of down) {
+                  if (playercells[node] === cell) {
+                    isOccupied = true
+                    break
+                  }
+                }
+              }
+              if (!isOccupied) Interface.cache.valid.push(down[0])
             }
-            if ((coor[0] - 1 * Interface.cache.length) >= -1) {
-              for (let i = 1; i < Interface.cache.length; i++) {
-                Interface.cache.valid.push((coor[0] - i) + coor[1] * 10)
+            if ((coor[0] - 1 * length) >= -1) {
+              const left = []
+              for (let i = 1; i < length; i++) {
+                left.push((coor[0] - i) + coor[1] * 10)
               }
+              let isOccupied = false
+              for (const cell of occupied) {
+                for (const node of left) {
+                  if (playercells[node] === cell) {
+                    isOccupied = true
+                    break
+                  }
+                }
+              }
+              if (!isOccupied) Interface.cache.valid.push(left[0])
             }
           } else if (Interface.cache.coor.length === 2) {
             const start = Interface.cache.coor[0]
@@ -250,14 +297,19 @@ const Interface = {
           cells[coor[0] + coor[1] * 10].setAttribute('class', 'occupied player-cell')
           DOM.enableGrid(Interface.cache.valid)
         }
-        // check if position placement is complete
         if (Interface.cache.coor.length === Interface.cache.length) {
           const coor = Interface.cache.coor
           const start = coor[0]
           const end = coor[coor.length - 1]
-          DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent = '0x'
+          const text = DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent
+          if (text === 'x2') {
+            DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent = 'x1'
+          } else {
+            DOM.playerShipSelection[`${Interface.cache.type}`].p.textContent = 'x0'
+          }
           DOM.enableSelection()
           Interface.playerBoard.place(start, end)
+          Interface.cache.coor = []
         }
         break
       case 'attacking':
@@ -267,51 +319,48 @@ const Interface = {
         //
         break
     }
-  },
-  init: function () {
-    DOM.start.setAttribute('style', 'display: none')
-    DOM.board.setAttribute('style', 'display: grid')
-    for (let i = 0; i < 10; i++) {
-      for (let j = 0; j < 10; j++) {
-        const cell = document.createElement('button')
-        cell.setAttribute('class', 'player-cell')
-        cell.setAttribute('disabled', '')
-        cell.onclick = () => Interface.sendData([j, i])
-        DOM.playerGrid.appendChild(cell)
-      }
-    }
-    for (let i = 0; i < 10; i++) {
-      for (let j = 0; j < 10; j++) {
-        const cell = document.createElement('button')
-        cell.setAttribute('disabled', true)
-        cell.onclick = () => Interface.sendData([j, i])
-        DOM.botGrid.appendChild(cell)
-      }
-    }
-    DOM.playerShipSelection.carrier.button.onclick = () => {
-      Interface.selectShip(5, 'carrier')
-    }
-    DOM.playerShipSelection.battleship.button.onclick = () => {
-      Interface.selectShip(4, 'battleship')
-    }
-    DOM.playerShipSelection.destroyer.button.onclick = () => {
-      Interface.selectShip(3, 'destroyer')
-    }
-    DOM.playerShipSelection.submarine.button.onclick = () => {
-      Interface.selectShip(2, 'submarine')
-    }
-    DOM.playerShipSelection.patrol.button.onclick = () => {
-      Interface.selectShip(1, 'patrol')
-    }
-    Interface.state = 'placing'
   }
 }
 
-const Bot = {
-  //
-}
+;(function generateGridCell () {
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+      const cell = document.createElement('button')
+      cell.setAttribute('class', 'player-cell')
+      cell.setAttribute('disabled', '')
+      cell.onclick = () => Interface.sendData([j, i])
+      DOM.playerGrid.appendChild(cell)
+    }
+  }
+  for (let i = 0; i < 10; i++) {
+    for (let j = 0; j < 10; j++) {
+      const cell = document.createElement('button')
+      cell.setAttribute('disabled', true)
+      cell.onclick = () => Interface.sendData([j, i])
+      DOM.botGrid.appendChild(cell)
+    }
+  }
+})()
 
-DOM.start.onclick = Interface.init()
-
-const Script = { Ship, Gameboard, Interface, Bot }
-export default Script
+;(function setEventToDOM () {
+  DOM.start.onclick = () => {
+    DOM.start.setAttribute('style', 'display: none')
+    DOM.board.setAttribute('style', 'display: grid')
+    Interface.state = 'placing'
+  }
+  DOM.playerShipSelection.carrier.button.onclick = () => {
+    Interface.selectShip(5, 'carrier')
+  }
+  DOM.playerShipSelection.battleship.button.onclick = () => {
+    Interface.selectShip(4, 'battleship')
+  }
+  DOM.playerShipSelection.destroyer.button.onclick = () => {
+    Interface.selectShip(3, 'destroyer')
+  }
+  DOM.playerShipSelection.submarine.button.onclick = () => {
+    Interface.selectShip(2, 'submarine')
+  }
+  DOM.playerShipSelection.patrol.button.onclick = () => {
+    Interface.selectShip(1, 'patrol')
+  }
+})()
