@@ -111,8 +111,8 @@ const DOM = {
   start: document.querySelector('#start'),
   wrapper: document.querySelector('.wrapper'),
   play: document.getElementById('play'),
-  playerGrid: document.querySelector('.player-grid'),
-  botGrid: document.querySelector('.bot-grid'),
+  playercells: [...document.querySelectorAll('.player-cell')],
+  botcells: [...document.querySelectorAll('.bot-cell')],
   playerShipSelection: {
     carrier: {
       button: document.querySelector('.ship button.carrier'),
@@ -152,40 +152,32 @@ const DOM = {
         DOM.playerShipSelection[ship].button.removeAttribute('disabled')
       }
     } else {
-      DOM.play.removeAttribute('disabled')
-      DOM.play.textContent = 'START'
-      DOM.play.style.color = 'black'
-      DOM.play.onclick = () => {
-        Bot.placeShip()
-        DOM.play.setAttribute('style', 'display: none')
-        Interface.state = 'placing'
-      }
+      Interface.attackPhase()
     }
   },
   enableGrid: function (included) {
     DOM.disableSelection()
-    const playercells = [...document.querySelectorAll('.player-cell')]
     const occupiedcell = [...document.querySelectorAll('.occupied')]
     const exclude = []
     for (const occupied of occupiedcell) {
-      for (const cell of playercells) {
+      for (const cell of DOM.playercells) {
         if (cell === occupied) {
-          exclude.push(playercells.indexOf(cell))
+          exclude.push(DOM.playercells.indexOf(cell))
         }
       }
     }
     if (included) {
-      for (let i = 0; i < playercells.length; i++) {
-        playercells[i].setAttribute('disabled', '')
+      for (let i = 0; i < DOM.playercells.length; i++) {
+        DOM.playercells[i].setAttribute('disabled', '')
       }
       for (let i = 0; i < included.length; i++) {
-        playercells[included[i]].removeAttribute('disabled')
+        DOM.playercells[included[i]].removeAttribute('disabled')
       }
     } else {
-      for (let i = 0; i < playercells.length; i++) {
+      for (let i = 0; i < DOM.playercells.length; i++) {
         if (exclude.includes(i)) {
           continue
-        } else playercells[i].removeAttribute('disabled')
+        } else DOM.playercells[i].removeAttribute('disabled')
       }
     }
   }
@@ -201,6 +193,20 @@ const Interface = {
     length: null,
     valid: []
   },
+  attackPhase: function () {
+    DOM.play.removeAttribute('disabled')
+    DOM.play.style.color = 'black'
+    DOM.play.textContent = 'START'
+    DOM.play.onclick = () => {
+      Bot.placeShip()
+      DOM.play.setAttribute('style', 'display: none')
+      Interface.state = 'attacking'
+      const cells = document.querySelectorAll('.bot-cell')
+      for (const cell of cells) {
+        cell.removeAttribute('disabled')
+      }
+    }
+  },
   selectShip: function (length, type) {
     DOM.enableGrid()
     Interface.cache.length = length
@@ -213,7 +219,7 @@ const Interface = {
           Interface.cache.coor.push(coor)
           if (Interface.cache.coor.length === 1) {
             const length = Interface.cache.length
-            const playercells = [...document.querySelectorAll('.player-cell')]
+            const playercells = [...DOM.playercells]
             const occupied = [...document.querySelectorAll('.occupied')]
             if ((coor[1] - 1 * length) >= -1) {
               const top = []
@@ -309,7 +315,7 @@ const Interface = {
             }
             Interface.cache.valid = validIndex
           }
-          const cells = document.querySelectorAll('.player-cell')
+          const cells = DOM.playercells
           cells[coor[0] + coor[1] * 10].setAttribute('class', 'occupied player-cell')
           DOM.enableGrid(Interface.cache.valid)
           if (Interface.cache.coor.length === Interface.cache.length) {
@@ -327,7 +333,7 @@ const Interface = {
             Interface.cache.coor = []
           }
         } else {
-          const cells = document.querySelectorAll('.player-cell')
+          const cells = DOM.playercells
           cells[coor[0] + coor[1] * 10].setAttribute('class', 'occupied player-cell')
           for (const index of cells) {
             index.setAttribute('disabled', '')
@@ -478,45 +484,61 @@ const Bot = {
   }
 }
 
-;(function generateGridCell () {
-  for (let i = 0; i < 10; i++) {
-    for (let j = 0; j < 10; j++) {
-      const cell = document.createElement('button')
-      cell.setAttribute('class', 'player-cell')
-      cell.setAttribute('disabled', '')
-      cell.onclick = () => Interface.sendData([j, i])
-      DOM.playerGrid.appendChild(cell)
-    }
-  }
-  for (let i = 0; i < 10; i++) {
-    for (let j = 0; j < 10; j++) {
-      const cell = document.createElement('button')
-      cell.setAttribute('disabled', true)
-      cell.onclick = () => Interface.sendData([j, i])
-      DOM.botGrid.appendChild(cell)
-    }
-  }
-})()
-
 ;(function setEventToDOM () {
-  DOM.start.onclick = () => {
+  DOM.start.onclick = (() => {
     DOM.start.setAttribute('style', 'display: none')
     DOM.wrapper.setAttribute('style', 'display: grid')
     Interface.state = 'placing'
+    ;(function autoGenerateShip () {
+      Interface.selectShip(5, 'carrier')
+      Interface.sendData([0, 0])
+      Interface.sendData([0, 1])
+      Interface.sendData([0, 2])
+      Interface.sendData([0, 3])
+      Interface.sendData([0, 4])
+      Interface.selectShip(4, 'battleship')
+      Interface.sendData([0, 5])
+      Interface.sendData([0, 6])
+      Interface.sendData([0, 7])
+      Interface.sendData([0, 8])
+      Interface.selectShip(3, 'destroyer')
+      Interface.sendData([1, 0])
+      Interface.sendData([1, 1])
+      Interface.sendData([1, 2])
+      Interface.selectShip(2, 'submarine')
+      Interface.sendData([1, 3])
+      Interface.sendData([1, 4])
+      Interface.selectShip(2, 'submarine')
+      Interface.sendData([1, 5])
+      Interface.sendData([1, 6])
+      Interface.selectShip(1, 'patrol')
+      Interface.sendData([1, 7])
+      Interface.selectShip(1, 'patrol')
+      Interface.sendData([1, 8])
+    })()
+  })()
+  for (const cell of DOM.playercells) {
+    cell.onclick = () => {
+      const x = +cell.value[0]
+      const y = +cell.value[1]
+      Interface.sendData([x, y])
+    }
   }
-  DOM.playerShipSelection.carrier.button.onclick = () => {
-    Interface.selectShip(5, 'carrier')
-  }
-  DOM.playerShipSelection.battleship.button.onclick = () => {
-    Interface.selectShip(4, 'battleship')
-  }
-  DOM.playerShipSelection.destroyer.button.onclick = () => {
-    Interface.selectShip(3, 'destroyer')
-  }
-  DOM.playerShipSelection.submarine.button.onclick = () => {
-    Interface.selectShip(2, 'submarine')
-  }
-  DOM.playerShipSelection.patrol.button.onclick = () => {
-    Interface.selectShip(1, 'patrol')
-  }
+  ;(function playerShipSelection () {
+    DOM.playerShipSelection.carrier.button.onclick = () => {
+      Interface.selectShip(5, 'carrier')
+    }
+    DOM.playerShipSelection.battleship.button.onclick = () => {
+      Interface.selectShip(4, 'battleship')
+    }
+    DOM.playerShipSelection.destroyer.button.onclick = () => {
+      Interface.selectShip(3, 'destroyer')
+    }
+    DOM.playerShipSelection.submarine.button.onclick = () => {
+      Interface.selectShip(2, 'submarine')
+    }
+    DOM.playerShipSelection.patrol.button.onclick = () => {
+      Interface.selectShip(1, 'patrol')
+    }
+  })()
 })()

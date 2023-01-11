@@ -42,7 +42,8 @@
             <p class="patrol">x2</p>
           </div>
         </div>
-        <div class="player-grid"></div>
+        <div class="player-grid">
+        </div>
       </div>
       <div class="board2">
         <div class="bot-grid"></div>
@@ -75,6 +76,28 @@
     </div>
   </div>
 
+  <script>
+    const playerGrid = document.querySelector('.player-grid')
+    const botGrid = document.querySelector('.bot-grid')
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        const cell = document.createElement('button')
+        cell.setAttribute('class', 'player-cell')
+        cell.setAttribute('disabled', '')
+        cell.setAttribute('value', `${j}${i}`)
+        playerGrid.appendChild(cell)
+      }
+    }
+    for (let i = 0; i < 10; i++) {
+      for (let j = 0; j < 10; j++) {
+        const cell = document.createElement('button')
+        cell.setAttribute('class', 'bot-cell')
+        cell.setAttribute('disabled', true)
+        cell.setAttribute('value', `${j}${i}`)
+        botGrid.appendChild(cell)
+      }
+    }
+  </script>
 </body>
 
 </html>
