@@ -156,7 +156,9 @@ const DOM = {
       DOM.play.textContent = 'START'
       DOM.play.style.color = 'black'
       DOM.play.onclick = () => {
-        //
+        Bot.placeShip()
+        DOM.play.setAttribute('style', 'display: none')
+        Interface.state = 'placing'
       }
     }
   },
@@ -347,6 +349,132 @@ const Interface = {
         //
         break
     }
+  }
+}
+
+const Bot = {
+  shipPosition: [],
+  getCoor: function () {
+    return Math.floor(Math.random() * 10)
+  },
+  placeShip: function () {
+    function generateShip (length) {
+      if (length === 1) {
+        let coor = null
+        while (true) {
+          const x = Bot.getCoor()
+          const y = Bot.getCoor()
+          const index = x + y * 10
+          if (!Bot.shipPosition.includes(index)) {
+            Bot.shipPosition.push(index)
+            coor = [x, y]
+            break
+          }
+        }
+        return [coor, coor]
+      } else {
+        let [start, end] = [null, null]
+        if (length === 2) {
+          while (true) {
+            const x0 = Bot.getCoor()
+            const y0 = Bot.getCoor()
+            const index0 = x0 + y0 * 10
+            if (Bot.shipPosition.includes(index0)) continue
+            else {
+              const vertical = Math.floor(Math.random() * 2)
+              if (vertical) {
+                const y1 = y0 + 1
+                if (y1 < 10) {
+                  const index1 = x0 + y1 * 10
+                  if (Bot.shipPosition.includes(index1)) {
+                    continue
+                  } else {
+                    start = [x0, y0]
+                    end = [x0, y1]
+                    Bot.shipPosition.push(index0, index1)
+                    break
+                  }
+                }
+              } else {
+                const x1 = x0 + 1
+                if (x1 < 10) {
+                  const index1 = x1 + y0 * 10
+                  if (Bot.shipPosition.includes(index1)) {
+                    continue
+                  } else {
+                    start = [x0, y0]
+                    end = [x1, y0]
+                    Bot.shipPosition.push(index0, index1)
+                    break
+                  }
+                }
+              }
+            }
+          }
+        } else {
+          while (true) {
+            const x0 = Bot.getCoor()
+            const y0 = Bot.getCoor()
+            const index0 = x0 + y0 * 10
+            if (Bot.shipPosition.includes(index0)) continue
+            else {
+              const vertical = Math.floor(Math.random() * 2)
+              if (vertical) {
+                const y1 = y0 + (length - 1)
+                if (y1 < 10) {
+                  let valid = true
+                  const cells = []
+                  for (let i = 1; i < length; i++) {
+                    const grid = index0 + 10 * i
+                    if (Bot.shipPosition.includes(grid)) valid = false
+                    cells.push(grid)
+                  }
+                  if (valid) {
+                    start = [x0, y0]
+                    end = [x0, y1]
+                    Bot.shipPosition.push(index0, ...cells)
+                    break
+                  } else continue
+                } else continue
+              } else {
+                const x1 = x0 + (length - 1)
+                if (x1 < 10) {
+                  let valid = true
+                  const cells = []
+                  for (let i = 1; i < length; i++) {
+                    const grid = index0 + 1 * i
+                    if (Bot.shipPosition.includes(grid)) valid = false
+                    cells.push(grid)
+                  }
+                  if (valid) {
+                    start = [x0, y0]
+                    end = [x1, y0]
+                    Bot.shipPosition.push(index0, ...cells)
+                    break
+                  } else continue
+                } else continue
+              }
+            }
+          }
+        }
+        return [start, end]
+      }
+    }
+    const ca = generateShip(5)
+    const bs = generateShip(4)
+    const dd = generateShip(3)
+    const sa = generateShip(2)
+    const sb = generateShip(2)
+    const pa = generateShip(1)
+    const pb = generateShip(1)
+
+    Interface.botBoard.place(ca[0], ca[1])
+    Interface.botBoard.place(bs[0], bs[1])
+    Interface.botBoard.place(dd[0], dd[1])
+    Interface.botBoard.place(sa[0], sa[1])
+    Interface.botBoard.place(sb[0], sb[1])
+    Interface.botBoard.place(pa[0], pa[1])
+    Interface.botBoard.place(pb[0], pb[1])
   }
 }
 
