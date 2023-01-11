@@ -89,6 +89,8 @@ body {
   display: grid;
   grid-template-columns: repeat(10, 40px);
   grid-template-rows: repeat(10, 40px);
+  column-gap: 5px;
+  row-gap: 5px;
 }
 
 .player-grid button,
@@ -100,6 +102,16 @@ body {
 
 .disabled {
   pointer-events: none;
+}
+
+.missed {
+  background-color: rgb(175, 50, 50);
+  border: none;
+}
+
+.hit {
+  border: 1px solid rgb(50, 50, 175);
+  background-color: rgb(10, 10, 10);
 }
 
 .boardStart {

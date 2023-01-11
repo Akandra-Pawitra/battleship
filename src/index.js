@@ -80,17 +80,14 @@ const Gameboard = () => {
   }
   const receiveAttack = function (coor) {
     const index = coor[0] + coor[1] * 10
-    const check = this.attack.includes(index)
-    if (check) {
-      return 1
-    } else {
+    if (!this.attack.includes(index)) {
+      this.attack.push(index)
       const ship = this.cells[index].ship
       if (ship) {
         this.ships[ship].hit()
         this.ships[ship].isSunk()
-      }
-      this.attack.push(index)
-      return 0
+        return 1
+      } else return 0
     }
   }
   const allSunk = function () {
@@ -197,15 +194,28 @@ const Interface = {
     DOM.play.removeAttribute('disabled')
     DOM.play.style.color = 'black'
     DOM.play.textContent = 'START'
-    DOM.play.onclick = () => {
+    DOM.play.onclick = (() => {
       Bot.placeShip()
+      DOM.playerShipSelection.carrier.p.textContent = 'x1'
+      DOM.playerShipSelection.battleship.p.textContent = 'x1'
+      DOM.playerShipSelection.destroyer.p.textContent = 'x1'
+      DOM.playerShipSelection.submarine.p.textContent = 'x2'
+      DOM.playerShipSelection.patrol.p.textContent = 'x2'
+
+      DOM.playerShipSelection.carrier.button.setAttribute('class', 'carrier disabled')
+      DOM.playerShipSelection.battleship.button.setAttribute('class', 'battleship disabled')
+      DOM.playerShipSelection.destroyer.button.setAttribute('class', 'destroyer disabled')
+      DOM.playerShipSelection.submarine.button.setAttribute('class', 'submarine disabled')
+      DOM.playerShipSelection.patrol.button.setAttribute('class', 'patrol disabled')
+
+      DOM.enableSelection()
       DOM.play.setAttribute('style', 'display: none')
       Interface.state = 'attacking'
       const cells = document.querySelectorAll('.bot-cell')
       for (const cell of cells) {
         cell.removeAttribute('disabled')
       }
-    }
+    })()
   },
   selectShip: function (length, type) {
     DOM.enableGrid()
@@ -349,7 +359,27 @@ const Interface = {
         }
         break
       case 'attacking':
-        //
+        // attack enemy board
+        // mark and permanently disable
+        if (Interface.botBoard.receiveAttack(coor)) {
+          DOM.botcells[coor[0] + coor[1] * 10].setAttribute('class', 'bot-cell hit disabled')
+        } else {
+          DOM.botcells[coor[0] + coor[1] * 10].setAttribute('class', 'bot-cell missed disabled')
+        }
+        Interface.botBoard.attack.push(coor[0] + coor[1] * 10)
+        for (const cell of DOM.botcells) {
+          cell.setAttribute('disabled', '')
+        }
+        setTimeout(() => {
+          Bot.attack()
+          for (const cell of DOM.botcells) {
+            cell.removeAttribute('disabled')
+          }
+        }, 500)
+        // disable board for 1 sec
+        // enemy attack
+        // mark and permanently disable
+        // enable board
         break
       case 'ended':
         //
@@ -481,6 +511,25 @@ const Bot = {
     Interface.botBoard.place(sb[0], sb[1])
     Interface.botBoard.place(pa[0], pa[1])
     Interface.botBoard.place(pb[0], pb[1])
+  },
+  attack: function () {
+    let coor = null
+    while (true) {
+      const index = Math.floor(Math.random() * 100)
+      if (Interface.playerBoard.attack.includes(index)) continue
+      else {
+        coor = index
+        break
+      }
+    }
+    const x = coor % 10
+    const y = (coor - x) / 10
+    if (Interface.playerBoard.receiveAttack([x, y])) {
+      DOM.playercells[x + y * 10].setAttribute('class', 'player-cell hit disabled')
+    } else {
+      DOM.playercells[x + y * 10].setAttribute('class', 'player-cell missed disabled')
+    }
+    Interface.playerBoard.attack.push(x + y * 10)
   }
 }
 
@@ -518,6 +567,13 @@ const Bot = {
     })()
   })()
   for (const cell of DOM.playercells) {
+    cell.onclick = () => {
+      const x = +cell.value[0]
+      const y = +cell.value[1]
+      Interface.sendData([x, y])
+    }
+  }
+  for (const cell of DOM.botcells) {
     cell.onclick = () => {
       const x = +cell.value[0]
       const y = +cell.value[1]
