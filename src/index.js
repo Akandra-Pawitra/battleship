@@ -80,15 +80,14 @@ const Gameboard = () => {
   }
   const receiveAttack = function (coor) {
     const index = coor[0] + coor[1] * 10
-    if (!this.attack.includes(index)) {
-      this.attack.push(index)
-      const ship = this.cells[index].ship
-      if (ship) {
-        this.ships[ship].hit()
-        this.ships[ship].isSunk()
-        return 1
-      } else return 0
-    }
+    this.attack.push(index)
+    const ship = this.cells[index].ship
+    if (ship) {
+      this.ships[ship].hit()
+      if (this.ships[ship].isSunk()) {
+        return [1, ship]
+      } else return 1
+    } else return 0
   }
   const allSunk = function () {
     const arr = []
@@ -130,6 +129,28 @@ const DOM = {
     patrol: {
       button: document.querySelector('.ship button.patrol'),
       p: document.querySelector('.ship p.patrol')
+    }
+  },
+  botShipSelection: {
+    carrier: {
+      button: document.querySelector('.ship2 button.carrier'),
+      p: document.querySelector('.ship2 p.carrier')
+    },
+    battleship: {
+      button: document.querySelector('.ship2 button.battleship'),
+      p: document.querySelector('.ship2 p.battleship')
+    },
+    destroyer: {
+      button: document.querySelector('.ship2 button.destroyer'),
+      p: document.querySelector('.ship2 p.destroyer')
+    },
+    submarine: {
+      button: document.querySelector('.ship2 button.submarine'),
+      p: document.querySelector('.ship2 p.submarine')
+    },
+    patrol: {
+      button: document.querySelector('.ship2 button.patrol'),
+      p: document.querySelector('.ship2 p.patrol')
     }
   },
   disableSelection: function () {
@@ -359,12 +380,36 @@ const Interface = {
         }
         break
       case 'attacking':
-        // attack enemy board
-        // mark and permanently disable
-        if (Interface.botBoard.receiveAttack(coor)) {
-          DOM.botcells[coor[0] + coor[1] * 10].setAttribute('class', 'bot-cell hit disabled')
-        } else {
-          DOM.botcells[coor[0] + coor[1] * 10].setAttribute('class', 'bot-cell missed disabled')
+        {
+          const hit = Interface.botBoard.receiveAttack(coor)
+          if (hit) {
+            DOM.botcells[coor[0] + coor[1] * 10].setAttribute('class', 'bot-cell hit disabled')
+            if (hit[1] !== undefined) {
+              const ship = hit[1]
+              if (ship === 'submarine1' || ship === 'submarine2') {
+                const text = DOM.botShipSelection.submarine.p.textContent
+                if (text === 'x2') {
+                  DOM.botShipSelection.submarine.p.textContent = 'x1'
+                } else {
+                  DOM.botShipSelection.submarine.p.textContent = 'x0'
+                  DOM.botShipSelection.submarine.button.setAttribute('disabled', '')
+                }
+              } else if (ship === 'patrol1' || ship === 'patrol2') {
+                const text = DOM.botShipSelection.patrol.p.textContent
+                if (text === 'x2') {
+                  DOM.botShipSelection.patrol.p.textContent = 'x1'
+                } else {
+                  DOM.botShipSelection.patrol.p.textContent = 'x0'
+                  DOM.botShipSelection.patrol.button.setAttribute('disabled', '')
+                }
+              } else {
+                DOM.botShipSelection[`${ship}`].button.setAttribute('disabled', '')
+                DOM.botShipSelection[`${ship}`].p.textContent = 'x0'
+              }
+            }
+          } else {
+            DOM.botcells[coor[0] + coor[1] * 10].setAttribute('class', 'bot-cell missed disabled')
+          }
         }
         Interface.botBoard.attack.push(coor[0] + coor[1] * 10)
         for (const cell of DOM.botcells) {
@@ -376,10 +421,6 @@ const Interface = {
             cell.removeAttribute('disabled')
           }
         }, 500)
-        // disable board for 1 sec
-        // enemy attack
-        // mark and permanently disable
-        // enable board
         break
       case 'ended':
         //
@@ -524,17 +565,43 @@ const Bot = {
     }
     const x = coor % 10
     const y = (coor - x) / 10
-    if (Interface.playerBoard.receiveAttack([x, y])) {
-      DOM.playercells[x + y * 10].setAttribute('class', 'player-cell hit disabled')
-    } else {
-      DOM.playercells[x + y * 10].setAttribute('class', 'player-cell missed disabled')
+    {
+      const hit = Interface.playerBoard.receiveAttack([x, y])
+      if (hit) {
+        DOM.playercells[coor].setAttribute('class', 'player-cell hit disabled')
+        if (hit[1] !== undefined) {
+          const ship = hit[1]
+          if (ship === 'submarine1' || ship === 'submarine2') {
+            const text = DOM.playerShipSelection.submarine.p.textContent
+            if (text === 'x2') {
+              DOM.playerShipSelection.submarine.p.textContent = 'x1'
+            } else {
+              DOM.playerShipSelection.submarine.p.textContent = 'x0'
+              DOM.playerShipSelection.submarine.button.setAttribute('disabled', '')
+            }
+          } else if (ship === 'patrol1' || ship === 'patrol2') {
+            const text = DOM.playerShipSelection.patrol.p.textContent
+            if (text === 'x2') {
+              DOM.playerShipSelection.patrol.p.textContent = 'x1'
+            } else {
+              DOM.playerShipSelection.patrol.p.textContent = 'x0'
+              DOM.playerShipSelection.patrol.button.setAttribute('disabled', '')
+            }
+          } else {
+            DOM.playerShipSelection[`${ship}`].button.setAttribute('disabled', '')
+            DOM.playerShipSelection[`${ship}`].p.textContent = 'x0'
+          }
+        }
+      } else {
+        DOM.playercells[coor].setAttribute('class', 'player-cell missed disabled')
+      }
     }
-    Interface.playerBoard.attack.push(x + y * 10)
+    Interface.playerBoard.attack.push(coor)
   }
 }
 
 ;(function setEventToDOM () {
-  DOM.start.onclick = (() => {
+  DOM.start.onclick = () => {
     DOM.start.setAttribute('style', 'display: none')
     DOM.wrapper.setAttribute('style', 'display: grid')
     Interface.state = 'placing'
@@ -565,7 +632,7 @@ const Bot = {
       Interface.selectShip(1, 'patrol')
       Interface.sendData([1, 8])
     })()
-  })()
+  }
   for (const cell of DOM.playercells) {
     cell.onclick = () => {
       const x = +cell.value[0]
