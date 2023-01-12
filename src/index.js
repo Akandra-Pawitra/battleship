@@ -107,6 +107,8 @@ const DOM = {
   start: document.querySelector('#start'),
   wrapper: document.querySelector('.wrapper'),
   play: document.getElementById('play'),
+  playerGrid: document.querySelector('.player-grid'),
+  botGrid: document.querySelector('.bot-grid'),
   playercells: [...document.querySelectorAll('.player-cell')],
   botcells: [...document.querySelectorAll('.bot-cell')],
   playerShipSelection: {
@@ -215,7 +217,7 @@ const Interface = {
     DOM.play.removeAttribute('disabled')
     DOM.play.style.color = 'black'
     DOM.play.textContent = 'START'
-    DOM.play.onclick = (() => {
+    DOM.play.onclick = () => {
       Bot.placeShip()
       DOM.playerShipSelection.carrier.p.textContent = 'x1'
       DOM.playerShipSelection.battleship.p.textContent = 'x1'
@@ -236,7 +238,7 @@ const Interface = {
       for (const cell of cells) {
         cell.removeAttribute('disabled')
       }
-    })()
+    }
   },
   selectShip: function (length, type) {
     DOM.enableGrid()
@@ -415,10 +417,24 @@ const Interface = {
         for (const cell of DOM.botcells) {
           cell.setAttribute('disabled', '')
         }
+        if (Interface.botBoard.allSunk()) {
+          DOM.botGrid.classList.add('disabled')
+          DOM.play.setAttribute('style', 'display: flex')
+          DOM.play.setAttribute('style', 'color: black')
+          DOM.play.textContent = 'PLAY AGAIN'
+          DOM.play.onclick = () => location.reload()
+        }
         setTimeout(() => {
           Bot.attack()
           for (const cell of DOM.botcells) {
             cell.removeAttribute('disabled')
+          }
+          if (Interface.playerBoard.allSunk()) {
+            DOM.playerGrid.classList.add('disabled')
+            DOM.play.setAttribute('style', 'display: flex')
+            DOM.play.setAttribute('style', 'color: black')
+            DOM.play.textContent = 'PLAY AGAIN'
+            DOM.play.onclick = () => location.reload()
           }
         }, 500)
         break
@@ -605,33 +621,6 @@ const Bot = {
     DOM.start.setAttribute('style', 'display: none')
     DOM.wrapper.setAttribute('style', 'display: grid')
     Interface.state = 'placing'
-    ;(function autoGenerateShip () {
-      Interface.selectShip(5, 'carrier')
-      Interface.sendData([0, 0])
-      Interface.sendData([0, 1])
-      Interface.sendData([0, 2])
-      Interface.sendData([0, 3])
-      Interface.sendData([0, 4])
-      Interface.selectShip(4, 'battleship')
-      Interface.sendData([0, 5])
-      Interface.sendData([0, 6])
-      Interface.sendData([0, 7])
-      Interface.sendData([0, 8])
-      Interface.selectShip(3, 'destroyer')
-      Interface.sendData([1, 0])
-      Interface.sendData([1, 1])
-      Interface.sendData([1, 2])
-      Interface.selectShip(2, 'submarine')
-      Interface.sendData([1, 3])
-      Interface.sendData([1, 4])
-      Interface.selectShip(2, 'submarine')
-      Interface.sendData([1, 5])
-      Interface.sendData([1, 6])
-      Interface.selectShip(1, 'patrol')
-      Interface.sendData([1, 7])
-      Interface.selectShip(1, 'patrol')
-      Interface.sendData([1, 8])
-    })()
   }
   for (const cell of DOM.playercells) {
     cell.onclick = () => {
